@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -70,6 +71,10 @@ func main() {
 				log.Println("Falling back to direct connection")
 			} else {
 				nodeAddress = resp.NodeAddress
+				if strings.HasPrefix(nodeAddress, "http://") {
+					nodeAddress = strings.TrimPrefix(nodeAddress, "http://")
+					log.Printf("Stripped http:// prefix from node address")
+				}
 				log.Printf("Gateway returned node address: %s", nodeAddress)
 			}
 		}
