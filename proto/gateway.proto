@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package streaming;
+
+option go_package = "event-pool/proto";
+
+// Gateway service definition
+service GatewayService {
+  // GetNodeForChain returns the address of a healthy node for a specific blockchain chain
+  rpc GetNodeForChain(GetNodeRequest) returns (GetNodeResponse) {}
+}
+
+// Node service definition
+service Node {
+  // StreamData streams data chunks to the client
+  rpc StreamData(StreamRequest) returns (stream DataChunk) {}
+}
+
+// Request to get node information for a chain
+message GetNodeRequest {
+  string chain_id = 1;
+}
+
+// Response containing node information
+message GetNodeResponse {
+  string node_address = 1;
+  string error_message = 2;  // Optional, for error cases
+}
+
+// Request to register a node for a data ID
+message RegisterNodeRequest {
+  string node_id = 1;
+  string data_id = 2;
+}
+
+// Response to node registration
+message RegisterNodeResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Request to stream data
+message StreamRequest {
+  string data_id = 1;
+  int64 offset = 2;  // Offset to resume streaming from
+}
+
+// Data chunk containing the actual data and metadata
+message DataChunk {
+  bytes data = 1;
+  int64 offset = 2;
+  int64 timestamp = 3;
+  string data_id = 4;
+} 

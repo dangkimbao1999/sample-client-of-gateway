@@ -1,0 +1,9 @@
+gateway:
+  address: "0.0.0.0"
+  port: 50051
+
+chains:
+  polygon:
+    chain_id: 2484
+    contract_address: "0xeddd02437aa5db6def90ff32c329decd2bcb86db"
+    event_signature: "TransferSingle" 

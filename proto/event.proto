@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package eventpool;
+
+option go_package = "event-pool/proto";
+
+// EventService provides methods for streaming blockchain events
+service EventService {
+  // StreamEvents streams blockchain events to clients
+  rpc StreamEvents(StreamEventsRequest) returns (stream Event) {}
+}
+
+// StreamEventsRequest contains the parameters for subscribing to events
+message StreamEventsRequest {
+  int32 chain_id = 1;
+  string contract_address = 2;
+  string event_signature = 3;
+}
+
+// Event represents a blockchain event
+message Event {
+  int64 block_number = 1;
+  string tx_hash = 2;
+  string data = 3;
+} 
