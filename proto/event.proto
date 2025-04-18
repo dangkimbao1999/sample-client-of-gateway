@@ -8,6 +8,7 @@ option go_package = "event-pool/proto";
 service EventService {
   // StreamEvents streams blockchain events to clients
   rpc StreamEvents(StreamEventsRequest) returns (stream Event) {}
+  rpc GetEvents(GetEventsRequest) returns (GetEventsResponse) {}
 }
 
 // StreamEventsRequest contains the parameters for subscribing to events
@@ -23,3 +24,34 @@ message Event {
   string tx_hash = 2;
   string data = 3;
 } 
+
+message GetEventsRequest {
+  int32 chain_id = 1;
+  string contract_address = 2;
+  string tx_hash = 3;  // Optional
+  int32 take = 4;     // Optional, default 10
+  int32 skip = 5;     // Optional, default 0
+}
+
+// GetEventsResponse contains a list of events and pagination info
+message GetEventsResponse {
+  repeated EventData data = 1;
+  Pagination pagination = 2;
+}
+
+// EventData represents a blockchain event with additional metadata
+message EventData {
+  string id = 1;
+  string contract_address = 2;
+  int64 block_number = 3;
+  string tx_hash = 4;
+  int32 log_index = 5;
+  string data = 6;
+  string created_at = 7;
+}
+
+// Pagination contains pagination information
+message Pagination {
+  int32 skip = 1;
+  int32 take = 2;
+}

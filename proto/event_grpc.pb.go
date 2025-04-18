@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	EventService_StreamEvents_FullMethodName = "/eventpool.EventService/StreamEvents"
+	EventService_GetEvents_FullMethodName    = "/eventpool.EventService/GetEvents"
 )
 
 // EventServiceClient is the client API for EventService service.
@@ -30,6 +31,7 @@ const (
 type EventServiceClient interface {
 	// StreamEvents streams blockchain events to clients
 	StreamEvents(ctx context.Context, in *StreamEventsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Event], error)
+	GetEvents(ctx context.Context, in *GetEventsRequest, opts ...grpc.CallOption) (*GetEventsResponse, error)
 }
 
 type eventServiceClient struct {
@@ -59,6 +61,16 @@ func (c *eventServiceClient) StreamEvents(ctx context.Context, in *StreamEventsR
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type EventService_StreamEventsClient = grpc.ServerStreamingClient[Event]
 
+func (c *eventServiceClient) GetEvents(ctx context.Context, in *GetEventsRequest, opts ...grpc.CallOption) (*GetEventsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetEventsResponse)
+	err := c.cc.Invoke(ctx, EventService_GetEvents_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EventServiceServer is the server API for EventService service.
 // All implementations must embed UnimplementedEventServiceServer
 // for forward compatibility.
@@ -67,6 +79,7 @@ type EventService_StreamEventsClient = grpc.ServerStreamingClient[Event]
 type EventServiceServer interface {
 	// StreamEvents streams blockchain events to clients
 	StreamEvents(*StreamEventsRequest, grpc.ServerStreamingServer[Event]) error
+	GetEvents(context.Context, *GetEventsRequest) (*GetEventsResponse, error)
 	mustEmbedUnimplementedEventServiceServer()
 }
 
@@ -79,6 +92,9 @@ type UnimplementedEventServiceServer struct{}
 
 func (UnimplementedEventServiceServer) StreamEvents(*StreamEventsRequest, grpc.ServerStreamingServer[Event]) error {
 	return status.Errorf(codes.Unimplemented, "method StreamEvents not implemented")
+}
+func (UnimplementedEventServiceServer) GetEvents(context.Context, *GetEventsRequest) (*GetEventsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetEvents not implemented")
 }
 func (UnimplementedEventServiceServer) mustEmbedUnimplementedEventServiceServer() {}
 func (UnimplementedEventServiceServer) testEmbeddedByValue()                      {}
@@ -112,13 +128,36 @@ func _EventService_StreamEvents_Handler(srv interface{}, stream grpc.ServerStrea
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type EventService_StreamEventsServer = grpc.ServerStreamingServer[Event]
 
+func _EventService_GetEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetEventsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EventServiceServer).GetEvents(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: EventService_GetEvents_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EventServiceServer).GetEvents(ctx, req.(*GetEventsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // EventService_ServiceDesc is the grpc.ServiceDesc for EventService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var EventService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "eventpool.EventService",
 	HandlerType: (*EventServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetEvents",
+			Handler:    _EventService_GetEvents_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "StreamEvents",
